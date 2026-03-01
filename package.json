@@ -1,0 +1,15 @@
+{
+  "name": "kassa-task",
+  "private": true,
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "start": "turbo start",
+    "test": "turbo test",
+    "lint": "turbo lint"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.6"
+  },
+  "packageManager": "pnpm@9.5.0"
+}

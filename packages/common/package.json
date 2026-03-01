@@ -1,0 +1,17 @@
+{
+  "name": "@kassa-task/common",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "dev": "pnpm build --watch",
+    "lint": "echo 'linting common...'"
+  },
+  "devDependencies": {
+    "tsup": "^8.2.2",
+    "typescript": "^5.5.3"
+  }
+}

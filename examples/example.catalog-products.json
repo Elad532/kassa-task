@@ -1,0 +1,183 @@
+[{
+  "_id": {
+    "$oid": "6989d492d0ca8969ace9fc97"
+  },
+  "title": "Mid-Century Mahogany Corner Wardrobe",
+  "description": "Espresso mid-century corner wardrobe made from premium mahogany. This wardrobe piece is featuring easy-to-assemble construction. Perfect for adding character to your home.",
+  "category": "Wardrobes",
+  "type": "Corner Wardrobe",
+  "price": 1409.99,
+  "width": 130,
+  "height": 216,
+  "depth": 100
+},
+{
+  "_id": {
+    "$oid": "6989d492d0ca8969ace9fca0"
+  },
+  "title": "Mid-Century Linen Garden Bench",
+  "description": "White mid-century garden bench made from premium linen. This benche piece is with hidden storage compartments. Perfect for adding character to your home.",
+  "category": "Benches",
+  "type": "Garden Bench",
+  "price": 609.99,
+  "width": 160,
+  "height": 90,
+  "depth": 58
+},
+{
+  "_id": {
+    "$oid": "6989d492d0ca8969ace9fcaf"
+  },
+  "title": "Scandinavian Metal Storage Cabinet",
+  "description": "Espresso scandinavian storage cabinet made from premium metal. This cabinet piece is featuring easy-to-assemble construction. Perfect for adding character to your home.",
+  "category": "Cabinets",
+  "type": "Storage Cabinet",
+  "price": 619.99,
+  "width": 81,
+  "height": 86,
+  "depth": 39
+},
+{
+  "_id": {
+    "$oid": "6989d492d0ca8969ace9fcc1"
+  },
+  "title": "Contemporary Mahogany Floor Lamp",
+  "description": "Espresso contemporary floor lamp made from premium mahogany. This lighting piece is with reinforced joints for lasting stability. Perfect for adding character to your home.",
+  "category": "Lighting",
+  "type": "Floor Lamp",
+  "price": 219.99,
+  "width": 40,
+  "height": 178,
+  "depth": 29
+},
+{
+  "_id": {
+    "$oid": "6989d492d0ca8969ace9fcc2"
+  },
+  "title": "Art Deco Birch Garden Bench",
+  "description": "Beige art deco garden bench made from premium birch. This benche piece is with a lightweight yet sturdy frame. Perfect for adding character to your home.",
+  "category": "Benches",
+  "type": "Garden Bench",
+  "price": 639.99,
+  "width": 129,
+  "height": 99,
+  "depth": 54
+},
+{
+  "_id": {
+    "$oid": "6989d492d0ca8969ace9fcd5"
+  },
+  "title": "Mid-Century Teak Side Table",
+  "description": "Navy mid-century side table made from premium teak. This table piece is with soft-close hardware and premium fittings. Perfect for adding character to your home.",
+  "category": "Tables",
+  "type": "Side Table",
+  "price": 219.99,
+  "width": 48,
+  "height": 54,
+  "depth": 41
+},
+{
+  "_id": {
+    "$oid": "6989d492d0ca8969ace9fcd7"
+  },
+  "title": "Traditional Teak Dining Bench",
+  "description": "Black traditional dining bench made from premium teak. This benche piece is featuring a sleek profile that saves floor space. Perfect for adding character to your home.",
+  "category": "Benches",
+  "type": "Dining Bench",
+  "price": 529.99,
+  "width": 112,
+  "height": 42,
+  "depth": 32
+},
+{
+  "_id": {
+    "$oid": "6989d492d0ca8969ace9fcdc"
+  },
+  "title": "Classic Birch Recliner",
+  "description": "Cream classic recliner made from premium birch. This chair piece is featuring easy-to-assemble construction. Perfect for adding character to your home.",
+  "category": "Chairs",
+  "type": "Recliner",
+  "price": 969.99,
+  "width": 94,
+  "height": 105,
+  "depth": 89
+},
+{
+  "_id": {
+    "$oid": "6989d492d0ca8969ace9fcea"
+  },
+  "title": "Classic Maple Standing Desk",
+  "description": "Natural classic standing desk made from premium maple. This desk piece is crafted for everyday use with elegant appeal. Perfect for adding character to your home.",
+  "category": "Desks",
+  "type": "Standing Desk",
+  "price": 419.99,
+  "width": 114,
+  "height": 108,
+  "depth": 74
+},
+{
+  "_id": {
+    "$oid": "6989d492d0ca8969ace9fced"
+  },
+  "title": "Minimalist Teak Loveseat",
+  "description": "Slate minimalist loveseat made from premium teak. This sofa piece is featuring hand-finished detailing. Perfect for adding character to your home.",
+  "category": "Sofas",
+  "type": "Loveseat",
+  "price": 1839.99,
+  "width": 157,
+  "height": 83,
+  "depth": 80
+},
+{
+  "_id": {
+    "$oid": "6989d492d0ca8969ace9fcfd"
+  },
+  "title": "Modern Walnut Pouf",
+  "description": "Brown modern pouf made from premium walnut. This ottoman piece is with rich texture and a warm finish. Perfect for adding character to your home.",
+  "category": "Ottomans",
+  "type": "Pouf",
+  "price": 139.99,
+  "width": 49,
+  "height": 41,
+  "depth": 51
+},
+{
+  "_id": {
+    "$oid": "6989d492d0ca8969ace9fcff"
+  },
+  "title": "Art Deco Cherry Tall Bookshelf",
+  "description": "Forest Green art deco tall bookshelf made from premium cherry. This bookshelve piece is featuring hand-finished detailing. Perfect for adding character to your home.",
+  "category": "Bookshelves",
+  "type": "Tall Bookshelf",
+  "price": 509.99,
+  "width": 86,
+  "height": 175,
+  "depth": 25
+},
+{
+  "_id": {
+    "$oid": "6989d492d0ca8969ace9fd08"
+  },
+  "title": "Minimalist Teak Floating TV Stand",
+  "description": "Taupe minimalist floating tv stand made from premium teak. This tv stand piece is with a smooth, scratch-resistant surface. Perfect for adding character to your home.",
+  "category": "TV Stands",
+  "type": "Floating TV Stand",
+  "price": 759.99,
+  "width": 133,
+  "height": 34,
+  "depth": 36
+},
+{
+  "_id": {
+    "$oid": "6989d492d0ca8969ace9fd40"
+  },
+  "title": "Classic Pine Single Drawer Nightstand",
+  "description": "Forest Green classic single drawer nightstand made from premium pine. This nightstand piece is designed to blend seamlessly into modern interiors. Perfect for adding character to your home.",
+  "category": "Nightstands",
+  "type": "Single Drawer Nightstand",
+  "price": 219.99,
+  "width": 46,
+  "height": 51,
+  "depth": 43
+}
+]
