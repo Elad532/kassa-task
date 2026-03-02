@@ -19,3 +19,10 @@ coverage
 
 # OS-specific
 .DS_Store
+
+# Environment — never commit real credentials
+.env
+.env.local
+
+# Claude Code local settings (may contain allowed-command lists with credentials)
+.claude/settings.local.json
