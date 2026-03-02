@@ -7,12 +7,46 @@ This is a pnpm monorepo using Turborepo, containing a NestJS backend, a Next.js 
 - Node.js v20+
 - pnpm
 
+## Environment Variables
+
+The API reads environment variables from `apps/api/.env`. Copy the example file and fill in the values:
+
+```bash
+cp apps/api/.env.example apps/api/.env
+```
+
+| Variable | Required | Description |
+|---|---|---|
+| `MONGODB_URI` | Yes | MongoDB connection string (Atlas or local) |
+
+## New Dependencies
+
+| Package | Location | Purpose |
+|---|---|---|
+| `zod` | `packages/common`, `apps/api` | Single source of truth for entity shapes |
+| `nestjs-zod` | `apps/api` | Generates NestJS DTOs from Zod schemas |
+| `@nestjs/config` | `apps/api` | Loads `.env` via `ConfigModule` |
+| `mongodb-memory-server` | `apps/api` (dev) | In-memory MongoDB for unit tests |
+
 ## Setup
 
 1.  **Install dependencies:**
 
     ```bash
     pnpm install
+    ```
+
+2.  **Set up environment variables:**
+
+    ```bash
+    cp apps/api/.env.example apps/api/.env
+    # Edit apps/api/.env with your MONGODB_URI
+    ```
+
+3.  **Build shared packages:**
+
+    ```bash
+    pnpm --filter @kassa-task/common build
     ```
 
 ## Development
@@ -34,13 +68,23 @@ The frontend is a standard Next.js application located in `apps/web`. The main p
 
 ### Backend (NestJS)
 
-The backend is a minimal NestJS application located in `apps/api`. It exposes a single endpoint:
+The backend is a NestJS application located in `apps/api`. It exposes:
 
--   `GET /api/hello`: Returns a JSON payload `{ "id": "1", "message": "hello world" }`.
+-   `GET /api/hello`: Returns `{ "id": "1", "message": "hello world" }`.
+
+#### Catalog API (read-only, backed by MongoDB Atlas)
+
+| Method | Route | Query Params | Description |
+|---|---|---|---|
+| GET | `/api/catalog/products` | `category?`, `type?`, `minPrice?`, `maxPrice?` | Filter products (compound index) |
+| GET | `/api/catalog/products/search` | `q` (required), `limit?` (default 20) | Full-text search on title + description |
+| GET | `/api/catalog/products/:id` | — | Find by MongoDB ObjectId |
+
+All query params are validated automatically via `ZodValidationPipe`. Invalid requests return `400` with field-level error details.
 
 ### Shared Types
 
-The `packages/common` directory contains TypeScript interfaces shared between the `api` and `web` applications, ensuring type safety across the stack.
+The `packages/common` directory contains Zod schemas and TypeScript types shared between the `api` and `web` applications, ensuring type safety across the stack. Zod schemas in `packages/common` are the single source of truth — Mongoose schemas and NestJS DTOs are derived from them automatically.
 
 ### CORS and API Proxy
 
@@ -62,13 +106,36 @@ This setup prevents Cross-Origin Resource Sharing (CORS) errors in the browser. 
 
 ## Testing
 
-To run all tests for all applications and packages:
+Tests are split into two suites in `apps/api`:
+
+| Suite | Files | Command |
+|---|---|---|
+| Unit / integration | `src/**/*.spec.ts` | `pnpm --filter api test` |
+| E2E (HTTP layer) | `test/**/*.e2e-spec.ts` | `pnpm --filter api test:e2e` |
+
+**Run only unit tests (API):**
+
+```bash
+pnpm --filter api test
+```
+
+**Run only e2e tests (API):**
+
+```bash
+pnpm --filter api test:e2e
+```
+
+**Run both suites (API):**
+
+```bash
+pnpm --filter api test && pnpm --filter api test:e2e
+```
+
+**Run all unit tests across the monorepo** (Turborepo — does not include e2e):
 
 ```bash
 pnpm test
 ```
-
-This command uses Turborepo to run Jest tests in both the `api` and `web` projects.
 
 ## Production
 
