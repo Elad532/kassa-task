@@ -1,5 +1,21 @@
 # Technical Specification
 
+## Table of Contents
+
+- [Architecture Overview](#architecture-overview)
+- [Features](#features)
+  - [Product Catalog (Read-Only)](#feature-product-catalog-read-only)
+    - [Architecture Decision](#architecture-decision)
+    - [Data Models](#data-models)
+    - [Atlas Indexes](#atlas-indexes)
+    - [API Endpoints](#api-endpoints)
+    - [State & Data Flow](#state--data-flow)
+    - [Dependencies](#dependencies)
+    - [Testing Strategy](#testing-strategy)
+    - [Connection Configuration](#connection-configuration)
+
+---
+
 ## Architecture Overview
 
 pnpm monorepo with Turborepo. NestJS backend (`apps/api`, port 3001), Next.js frontend (`apps/web`, port 3000), shared types in `packages/common`.

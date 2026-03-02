@@ -6,11 +6,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Each entry maps to one commit: `[Unreleased/version] → commit → feature → change type`.
 Every commit section opens with the prompt or intention that created it.
 
+## Table of Contents
+
+- [Unreleased](#unreleased)
+
+---
+
 ## [Unreleased]
+
+### (root)/(docs)->docs: add table of contents to all human-facing documents
+
+> **Prompt:** "the changelog, readme, and other human facing documents should have a table of contents. update all of them now"
+> **Intent:** Improve navigability of all human-facing documents by adding a Table of Contents section after each title.
+
+#### Documentation
+##### Changed
+- `CHANGELOG.md` — added TOC linking to each version section; added `---` separator between TOC and content
+- `README.md` — added full TOC with nested sub-links covering all 10 sections
+- `docs/TECH_SPEC.md` — added nested TOC down to section level (Architecture Decision, Data Models, Atlas Indexes, API Endpoints, etc.)
+- `docs/PRD.md` — added minimal TOC matching the template structure (grows as features are added)
+
+---
 
 ### (api)/(config)->fix: wrap tsconfig.json compiler options in compilerOptions key
 
-> **Prompt:** Commit the latest staged changes.
+> **Prompt:** "Fix the app.service annotation errors"
 > **Intent:** The tsconfig.json was missing its `compilerOptions` wrapper, silently breaking decorator metadata in ts-jest. Fix it before it causes harder-to-diagnose test failures later.
 
 #### Infrastructure
@@ -22,7 +42,7 @@ Every commit section opens with the prompt or intention that created it.
 
 ### (api)/(catalog)->test: add e2e HTTP-layer tests for catalog and app endpoints
 
-> **Prompt:** "Where are the tests? This isn't TDD."
+> **Prompt:** "Create the e2e tests"
 > **Intent:** The existing tests only covered the service layer in isolation. The HTTP stack — routing, global pipes, status codes, validation errors — was completely untested. Add a full e2e suite that boots a real NestJS app and sends actual HTTP requests.
 
 #### Product Catalog

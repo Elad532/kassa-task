@@ -1,5 +1,12 @@
 # Product Requirements Document
 
+## Table of Contents
+
+- [Project Overview](#project-overview)
+- [Features](#features)
+
+---
+
 ## Project Overview
 <!-- Brief description of the product and its purpose -->
 

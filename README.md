@@ -2,6 +2,24 @@
 
 This is a pnpm monorepo using Turborepo, containing a NestJS backend, a Next.js frontend, and a shared types package.
 
+## Table of Contents
+
+- [Requirements](#requirements)
+- [Environment Variables](#environment-variables)
+- [New Dependencies](#new-dependencies)
+- [Setup](#setup)
+- [Development](#development)
+- [How It Works](#how-it-works)
+  - [Frontend (Next.js)](#frontend-nextjs)
+  - [Backend (NestJS)](#backend-nestjs)
+  - [Shared Types](#shared-types)
+  - [CORS and API Proxy](#cors-and-api-proxy)
+- [Testing](#testing)
+- [Production](#production)
+- [Troubleshooting](#troubleshooting)
+
+---
+
 ## Requirements
 
 - Node.js v20+
