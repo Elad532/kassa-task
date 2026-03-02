@@ -111,8 +111,13 @@ When implementing a new feature, follow this sequence. STOP at marked phases for
 - Show me the proposed content for review before creating any sub-`CLAUDE.md`
 
 ## Documentation Standards
-- CHANGELOG.md: Keep a Changelog format (Added, Changed, Fixed, Removed, Deprecated, Security)
-  - Update under `[Unreleased]` with every feature commit
+- CHANGELOG.md: Keep a Changelog format — structure is `[Unreleased]` → commit → feature → change type
+  - Each commit gets its own `### (package)/(scope)->type: description` sub-section under `[Unreleased]`
+  - Immediately under the commit header, add a `> **Prompt:** ...` / `> **Intent:** ...` blockquote describing the user request or goal that produced this commit
+  - Under each commit, group by `#### Feature Name`, then `##### Added`, `##### Changed`, etc.
+  - Omit `Fixed`, `Removed`, `Deprecated`, `Security` headings when empty
+  - Every entry must be human-readable: describe the *why*, not just the file name
+  - Update `[Unreleased]` with every commit; rename to `[version] - date` on release
 - README.md: Update when setup steps change, new dependencies are added, or public interfaces change
 - Architecture diagrams: Mermaid diagrams in `docs/architecture/{feature}.md` for new features
   - Sequence diagram for API flows, flowchart for business logic, class/ER for data models
