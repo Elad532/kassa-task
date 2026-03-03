@@ -10,6 +10,7 @@ Every commit section opens with the prompt or intention that created it.
 
 - [Unreleased](#unreleased)
   - [(root)/(docs)->docs: update PRD confidence scale and guardrail schema](#rootdocs-docs-update-prd-confidence-scale-and-guardrail-schema)
+  - [(web)/(infra)->chore: add missing jest and mocha types](#webinfra-chore-add-missing-jest-and-mocha-types)
   - [(web)/(navigation)->feat: implement SearchSurface with file validation and query bar](#webnavigation-feat-implement-searchsurface-with-file-validation-and-query-bar)
   - [(web)/(navigation)->feat: implement NavBar with tab routing and key input](#webnavigation-feat-implement-navbar-with-tab-routing-and-key-input)
   - [(web)/(navigation)->feat: implement apiClient with x-gemini-key header injection](#webnavigation-feat-implement-apiclient-with-x-gemini-key-header-injection)
@@ -34,6 +35,16 @@ Every commit section opens with the prompt or intention that created it.
 
 ---
 
+### (web)/(infra)->chore: add missing jest and mocha types
+
+> **Intent:** Resolve TypeScript environment inconsistencies in the web workspace by adding missing `@types/jest` and `@types/mocha` dependencies.
+
+#### Infrastructure
+##### Changed
+- `apps/web/package.json` — Added `@types/jest` and `@types/mocha` to dependencies.
+- `pnpm-lock.yaml` — Updated to reflect new workspace dependencies.
+
+---
 
 
 ### (web)/(navigation)->feat: implement SearchSurface with file validation and query bar
