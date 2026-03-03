@@ -9,6 +9,7 @@ Every commit section opens with the prompt or intention that created it.
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+  - [(root)/(docs)->docs: define Stage 2 and L3 architecture in TECH_SPEC with Mermaid diagrams](#rootdocs-docs-define-stage-2-and-l3-architecture-in-tech_spec-with-mermaid-diagrams)
   - [(root)/(docs)->docs: update PRD confidence scale and guardrail schema](#rootdocs-docs-update-prd-confidence-scale-and-guardrail-schema)
   - [(web)/(infra)->chore: add missing jest and mocha types](#webinfra-chore-add-missing-jest-and-mocha-types)
   - [(web)/(navigation)->feat: implement SearchSurface with file validation and query bar](#webnavigation-feat-implement-searchsurface-with-file-validation-and-query-bar)
@@ -21,6 +22,21 @@ Every commit section opens with the prompt or intention that created it.
 ---
 
 ## [Unreleased]
+
+### (root)/(docs)->docs: define Stage 2 and L3 architecture in TECH_SPEC with Mermaid diagrams
+
+> **Intent:** Document the Stage 2 (Vocabulary Expansion) and Stage 3 L3 (Vector Search on Local Mirror) architecture in TECH_SPEC, with architecture diagram links to a new `docs/architecture/stage2-l3.md` file containing Mermaid flowcharts, class diagrams, and a module dependency graph.
+
+#### Stage 2 — Vocabulary Expansion
+##### Added
+- `docs/TECH_SPEC.md` — Stage 2 section: architecture decision, vocabulary singleton design (`_id: 'singleton'`), refresh strategy, expansion algorithm, NestJS module structure, dependency on `@langchain/google-genai`
+- `docs/TECH_SPEC.md` — Stage 3 L3 section: architecture decision, local MongoDB infrastructure (Atlas-local image requirement), embedding model constraint, multi-connection pattern, HNSW index, search query, RRF fusion formula, admin thresholds table
+- `docs/architecture/stage2-l3.md` — Four Mermaid diagrams: (1) Stage 2 expansion flowchart (vocabulary lookup → LLM batch → reconstructed analysis); (2) Stage 3 L3 search flowchart (reconstructProse → embed → $vectorSearch → product_ids); (3) local mirror data model class diagram (`CatalogVocabularySchema`, `ProductEmbeddingSchema`, services); (4) NestJS module dependency graph (`AppModule` → `MirrorModule`, `VocabularyExpansionModule`)
+
+##### Changed
+- `docs/TECH_SPEC.md` — Added reference links from Stage 2 and L3 sections to `docs/architecture/stage2-l3.md`
+
+---
 
 ### (root)/(docs)->docs: update PRD confidence scale and guardrail schema
 

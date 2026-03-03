@@ -2,19 +2,29 @@ import { z } from 'zod';
 import { Schema, SchemaDefinition } from 'mongoose';
 
 type MongooseFieldDef = {
-  type: typeof String | typeof Number | typeof Boolean;
+  type: typeof String | typeof Number | typeof Boolean | typeof Date | (typeof String)[] | (typeof Number)[];
   required: boolean;
 };
 
 /**
  * Converts a Zod field type to a Mongoose schema field definition.
- * Supported types: ZodString, ZodNumber, ZodOptional (wrapping either).
+ * Supported types: ZodString, ZodNumber, ZodBoolean, ZodDate, ZodArray,
+ * ZodOptional (wrapping any supported type), ZodNullable (wrapping any supported type).
  * Throws for any unsupported type to keep the schema honest.
  */
 function zodFieldToMongoose(type: z.ZodTypeAny): MongooseFieldDef {
   if (type instanceof z.ZodString) return { type: String, required: true };
   if (type instanceof z.ZodNumber) return { type: Number, required: true };
+  if (type instanceof z.ZodBoolean) return { type: Boolean, required: true };
+  if (type instanceof z.ZodDate) return { type: Date, required: true };
+  if (type instanceof z.ZodArray) {
+    const inner = zodFieldToMongoose(type.element as z.ZodTypeAny);
+    return { type: [inner.type as typeof String | typeof Number], required: true };
+  }
   if (type instanceof z.ZodOptional) {
+    return { ...zodFieldToMongoose(type.unwrap() as z.ZodTypeAny), required: false };
+  }
+  if (type instanceof z.ZodNullable) {
     return { ...zodFieldToMongoose(type.unwrap() as z.ZodTypeAny), required: false };
   }
   throw new Error(

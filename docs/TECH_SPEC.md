@@ -13,6 +13,42 @@
     - [Dependencies](#dependencies)
     - [Testing Strategy](#testing-strategy)
     - [Connection Configuration](#connection-configuration)
+  - [Navigation, Search Surface, and API Key Handling (F1–F3)](#feature-navigation-search-surface-and-api-key-handling-f1f3)
+    - [Architecture Decision](#architecture-decision-1)
+    - [Component Tree](#component-tree)
+    - [Routing](#routing)
+    - [State & Data Flow](#state--data-flow-1)
+    - [API Key Transport](#api-key-transport)
+    - [File Validation](#file-validation-client-side-before-upload)
+    - [Query Bar](#query-bar)
+    - [Key Files](#key-files)
+    - [Dependencies](#dependencies-1)
+  - [Matching Pipeline (F4)](#feature-matching-pipeline-f4)
+    - [Architecture Decision](#architecture-decision-2)
+    - [Pipeline Stages](#pipeline-stages)
+    - [Domain Types](#domain-types-packagescommunsrcmatchschemats)
+    - [Confidence Scale](#confidence-scale)
+    - [Stage 3 Execution Model](#stage-3-execution-model)
+    - [NestJS Module Structure](#nestjs-module-structure)
+    - [API Endpoints](#api-endpoints-1)
+    - [Performance Targets](#performance-targets)
+    - [Dependencies](#dependencies-2)
+  - [Stage 2: Vocabulary Expansion](#stage-2-vocabulary-expansion)
+    - [Architecture Decision](#architecture-decision-3)
+    - [Vocabulary Singleton](#vocabulary-singleton)
+    - [Refresh Strategy](#refresh-strategy)
+    - [Expansion Algorithm](#expansion-algorithm)
+    - [NestJS Module Structure](#nestjs-module-structure-1)
+    - [Dependencies](#dependencies-3)
+  - [Stage 3 L3: Vector Search on Local Mirror](#stage-3-l3-vector-search-on-local-mirror)
+    - [Architecture Decision](#architecture-decision-4)
+    - [Local MongoDB Infrastructure](#local-mongodb-infrastructure)
+    - [Embedding Model Constraint](#embedding-model-constraint)
+    - [Multi-Connection Pattern](#multi-connection-pattern)
+    - [HNSW Index](#hnsw-index)
+    - [Search Query](#search-query)
+    - [RRF Fusion](#rrf-fusion)
+    - [Admin Thresholds (1–10 scale)](#admin-thresholds-110-scale)
 
 ---
 
@@ -199,6 +235,320 @@ No new dependencies added. All APIs are natively available:
 - Routing: `next/link`, `next/navigation` — already in Next.js 14
 - State: React `useState`, `createContext`, `useContext` — built-in
 - Form data: native `FormData`
+
+---
+
+### Feature: Matching Pipeline (F4)
+
+#### Architecture Decision
+
+The matching pipeline is the core AI feature. It receives an image and/or text query,
+runs a multi-stage LLM + retrieval pipeline, and returns ranked furniture matches.
+
+Because the pipeline is long-running (p95 ~5–9 s) and involves multiple sequential and
+parallel LLM calls, the API uses a **two-step SSE pattern** to avoid proxy timeouts and
+give users live progress:
+
+1. `POST /api/match` — accepts the upload, generates a `queryId`, returns `202` immediately.
+2. `GET /api/match/:queryId/stream` — SSE stream; one event per completed stage; frontend
+   renders results progressively.
+
+The `MatchModule` is backend-only. All domain types live in `packages/common/src/match.schema.ts`.
+
+#### Pipeline Stages
+
+```
+POST /api/match (202 → queryId)
+  │
+  ├──── Stage 0: Guardrail (Gemini Flash) ──────────────────────────────────────────┐
+  │     guardrail_complete event → client shows detected_subject ~1 s in             │
+  │                                                                                  │
+  └──── Stage 1: Vision + Query Analysis (Gemini Pro) ─────────────────────────────┘
+        analysis_complete event → client populates intent panel attributes
+          │
+          ├──────────────────────────────────────────── L3: Vector search (original analysis)
+          │                                                                           │
+          └── Stage 2: Vocabulary Expansion (Gemini Flash)                            │
+              expansion_complete event → client updates intent panel                  │
+                │                                                                     │
+                ├── L1: Compound index filter (expanded analysis)                     │
+                └── L2: BM25 template match (expanded analysis) ─────────── RRF fusion┘
+                                                                                  │
+                                                               retrieval_complete event
+                                                               → client renders results immediately
+                                                                                  │
+                                                            Stage 4: Critic (Gemini Pro)
+                                                            result event → scores overlay; stream ends
+```
+
+#### Domain Types (`packages/common/src/match.schema.ts`)
+
+All Zod schemas and TypeScript interfaces for the entire pipeline live here. Key types:
+
+| Type | Purpose |
+|---|---|
+| `Reasoned` | Base type for every LLM-attributed value — `confidence` (1–10) + `reasoning` |
+| `GuardrailResponseSchema` | Stage 0 output — extends `Reasoned`, adds `detected_subject`, `additional_subjects` |
+| `FurnitureAnalysisSchema` | Stage 1/2 output — unified analysis shape used throughout pipeline |
+| `matchRequestSchema` | Validates `POST /api/match` text fields (file handled by `FileInterceptor`) |
+| `MatchErrorCode` | All pipeline error codes emitted via SSE `error` event |
+| `MatchSseEventTypeSchema` | Discriminated SSE event type enum |
+| `MatchSseEvent` | Discriminated union of all typed SSE event interfaces |
+| `PreliminaryMatchResult` | RRF-ranked candidate before critic — payload of `retrieval_complete` |
+| `MatchResult` | Critic-scored candidate — payload of `result` |
+| `MatchSearchIntent` | Shared intent block (reused in both response shapes) |
+| `MatchPreliminaryResponse` | Payload of `retrieval_complete` event |
+| `MatchResponse` | Payload of `result` event (final, critic scores populated) |
+
+#### Confidence Scale
+
+All `confidence` fields use a **1–10 scale** (`Reasoned.confidence`). A score of 7 means
+genuinely acceptable. Admin thresholds use the same scale:
+
+| Config field | Default | Meaning |
+|---|---|---|
+| `guardrailConfidenceThreshold` | 6 | Below this → `NOT_FURNITURE` |
+| `overallConfidenceThreshold` | 4 | Below this → `LOW_CONFIDENCE` |
+| `categoryConfidenceThreshold` | 7 | Below this → category filter dropped from L1/L2 |
+| `typeConfidenceThreshold` | 7 | Below this → type filter dropped |
+
+#### Stage 3 Execution Model
+
+L3 starts immediately after Stage 1 using the **original unexpanded** analysis, in
+parallel with Stage 2 and the L1/L2 calls. L1 and L2 wait for Stage 2; L3 does not.
+RRF fusion waits for all three layers before emitting `retrieval_complete`.
+
+#### NestJS Module Structure
+
+```
+apps/api/src/match/
+├── dto/
+│   └── match-request.dto.ts     ← extends createZodDto(matchRequestSchema)
+├── match.controller.ts          ← POST /api/match + GET /api/match/:id/stream
+├── match.service.ts             ← pipeline orchestration (Phase 2+)
+└── match.module.ts              ← NestJS module, registered in AppModule
+```
+
+#### API Endpoints
+
+##### POST /api/match
+- **Request**: `multipart/form-data` — `image` (file, optional) + `userQuery` (string, optional)
+- **Headers**: `x-gemini-key`, `x-openai-key`
+- **Response**: `202 { queryId }`
+- **Immediate errors**: `400 MISSING_INPUT`, `401 INVALID_KEY`
+
+##### GET /api/match/:queryId/stream
+- **Response**: `text/event-stream`
+- **Events**: `guardrail_complete` → `analysis_complete` → `expansion_complete` → `retrieval_complete` → `result` (or `error` at any point)
+
+#### Performance Targets
+
+| Target | Value |
+|---|---|
+| Time to first results (p95) | < 5 s (`retrieval_complete` event) |
+| Time to scored results (p95) | < 9 s (`result` event) |
+
+Critical path: Stage 1 (Gemini Pro, 4–6 s p95) + Stage 2 (0.6–0.9 s) + max(L1/L2, L3) + Stage 4 (Gemini Pro, 4–6 s p95).
+
+#### Dependencies
+
+| Package | Location | Purpose |
+|---|---|---|
+| `@types/multer` | `apps/api` (dev) | `Express.Multer.File` type for file upload handling |
+| `@nestjs/platform-express` | `apps/api` | Already installed — provides `FileInterceptor` |
+| `rxjs` | `apps/api` | Already installed — NestJS SSE uses `Observable` |
+
+---
+
+### Stage 2: Vocabulary Expansion
+
+See full flow and module dependency diagrams in [docs/architecture/stage2-l3.md](architecture/stage2-l3.md).
+
+#### Architecture Decision
+
+Stage 2 maps the raw LLM-generated terms from `FurnitureAnalysis` (e.g. `"armoire"`) to the
+exact vocabulary present in the Atlas catalog (e.g. `"Wardrobes"`). This is necessary before
+L1 (compound index filter) and L2 (BM25 template match) can produce useful results — MongoDB
+compound index queries require exact token matches.
+
+The vocabulary is stored as a **singleton document** (`_id: 'singleton'`) in the
+`catalog_vocabulary` collection in local MongoDB. This design avoids querying Atlas on every
+request. The document is refreshed on demand via `VocabularyService.refresh()`.
+
+#### Vocabulary Singleton
+
+The `catalog_vocabulary` document uses `_id: 'singleton'` (a plain string, not an ObjectId).
+This is a Mongoose-level concern only — the Zod schema (`CatalogVocabularySchema`) does not
+include `_id` to stay clean of persistence internals. The Mongoose schema is written manually
+with `{ _id: { type: String } }` and includes a comment explaining this boundary.
+
+#### Refresh Strategy
+
+`VocabularyService.getVocabulary(maxAgeMs?)`:
+1. Reads the singleton from local MongoDB
+2. If absent or `refreshedAt` older than `maxAgeMs`, calls `refresh()`
+3. Returns the `CatalogVocabulary` document
+
+`VocabularyService.refresh(sampleSize?)`:
+1. Queries Atlas for `distinct('category')` and `distinct('type')` (index-resident — fast)
+2. Samples `sampleSize` products from Atlas
+3. Extracts materials, colors, and styles via regex patterns; falls back to Gemini Flash for unmatched terms
+4. Upserts `{ _id: 'singleton', ...vocabulary, refreshedAt: new Date() }` to local MongoDB
+
+#### Expansion Algorithm
+
+`VocabularyExpansionService.expand(analysis, vocabulary)`:
+1. Extracts all `value` fields from the analysis
+2. Case-insensitive exact match check — terms already in the vocabulary are kept unchanged (no LLM call)
+3. Non-matching terms are batched into one Gemini Flash call via LangChain `withStructuredOutput`:
+   ```typescript
+   const MappingSchema = z.object({
+     mappings: z.array(z.object({ original: z.string(), mapped: z.string() })),
+   });
+   ```
+4. Reconstructs a new `FurnitureAnalysis` with mapped values
+5. **NEVER throws** — catches all errors and returns the original analysis unchanged
+
+**Execution timing**: L3 starts immediately after Stage 1 with the **original unexpanded**
+analysis in parallel with Stage 2. L1 and L2 wait for Stage 2 to complete. L3 does NOT wait.
+
+#### NestJS Module Structure
+
+```
+apps/api/src/
+├── mirror/
+│   ├── mirror.module.ts                              ← connectionName: 'local'
+│   └── vocabulary/
+│       ├── vocabulary.module.ts
+│       ├── vocabulary.service.ts
+│       └── schemas/
+│           └── catalog-vocabulary.schema.ts          ← manual schema (_id: String)
+└── pipeline/
+    └── vocabulary-expansion/
+        ├── vocabulary-expansion.module.ts
+        └── vocabulary-expansion.service.ts
+```
+
+#### Dependencies
+
+| Package | Location | Purpose |
+|---|---|---|
+| `@langchain/google-genai` | `apps/api` | Gemini Flash structured output for term mapping |
+
+---
+
+### Stage 3 L3: Vector Search on Local Mirror
+
+See full search flow and data model diagrams in [docs/architecture/stage2-l3.md](architecture/stage2-l3.md).
+
+#### Architecture Decision
+
+L3 performs semantic vector search over product embeddings stored in local MongoDB.
+Because Atlas is read-only, the `product_embeddings` collection and its HNSW index
+live in the local `mongodb/mongodb-atlas-local:7.0` container.
+
+L3 runs in parallel with Stage 2 using the **original unexpanded** analysis from Stage 1.
+It does not wait for Stage 2 — see Stage 3 Execution Model above.
+
+#### Local MongoDB Infrastructure
+
+The local MongoDB container **must** use `mongodb/mongodb-atlas-local:7.0` — NOT the
+community `mongo` image. Only the Atlas-local image supports `$vectorSearch` and
+`createSearchIndex` with `type: 'vectorSearch'`.
+
+`docker-compose.yml` at repo root:
+- Image: `mongodb/mongodb-atlas-local:7.0`
+- Port: `27017:27017`
+- Named volume: `local_mongo_data`
+- Health check: `mongosh --eval "db.adminCommand('ping')"`
+
+#### Embedding Model Constraint
+
+All embeddings in `product_embeddings` **must** use `text-embedding-004` (Gemini, 768
+dimensions). Mixing embedding models invalidates cosine similarity — if the model ever
+changes, the entire collection must be re-embedded.
+
+`EmbeddingsService.reconstructProse(analysis)` converts `FurnitureAnalysis` to natural
+language prose before embedding — never JSON:
+
+```
+"{furniture_type}. {category}. {styles joined}. {materials joined} construction. {colors joined}."
+```
+
+Null/empty fields are skipped. The output must not contain `{`, `}`, or `"confidence"`.
+
+#### Multi-Connection Pattern
+
+NestJS Mongoose requires the `connectionName: 'local'` string in **all three** registration
+points or it silently binds to the Atlas default connection:
+
+1. `MongooseModule.forRootAsync({ connectionName: 'local', ... })` — in `MirrorModule`
+2. `MongooseModule.forFeature([...], 'local')` — in each child feature module
+3. `@InjectModel(MODEL_NAME, 'local')` — in each service constructor
+
+#### HNSW Index
+
+The HNSW vector index is created in `EmbeddingsModule.onModuleInit()`:
+
+```typescript
+await collection.createSearchIndex({
+  name: 'embedding_hnsw',
+  type: 'vectorSearch',
+  definition: {
+    fields: [
+      { type: 'vector', path: 'embedding', numDimensions: 768, similarity: 'cosine' },
+      { type: 'filter', path: 'category' },
+      { type: 'filter', path: 'price' },
+    ],
+  },
+});
+```
+
+"Already exists" errors are swallowed — creation is idempotent.
+`autoIndex: true`, `autoCreate: true` for the local connection (writable).
+
+#### Search Query
+
+`EmbeddingsService.search(analysis, candidateCount, priceRange?, categoryFilter?)`:
+1. `reconstructProse(analysis)` → prose string
+2. `text-embedding-004` Gemini call → `number[768]`
+3. `$vectorSearch` aggregation:
+
+```typescript
+{ $vectorSearch: {
+  index: 'embedding_hnsw',
+  path: 'embedding',
+  queryVector: vector,
+  numCandidates: candidateCount * 3,
+  limit: candidateCount,
+  filter: buildMqlFilter(priceRange, categoryFilter),
+}}
+```
+
+Returns `product_id[]` in cosine-similarity rank order.
+
+#### RRF Fusion
+
+Stage 3 combines three retrieval layers (L1, L2, L3) using Reciprocal Rank Fusion.
+The scores are on incomparable scales (boolean presence, BM25 score, cosine similarity),
+so RRF provides a scale-invariant merge:
+
+$$\text{rrfScore}(p) = \sum_{\ell \in \{L1, L2, L3\}} \frac{1}{k + \text{rank}_\ell(p)}$$
+
+where $k = 60$ (standard RRF constant). Products not appearing in a layer receive rank $\infty$
+(contributing 0 to the sum). Results are sorted descending by `rrfScore`.
+
+#### Admin Thresholds (1–10 scale)
+
+All admin confidence thresholds use the same 1–10 scale as `Reasoned.confidence`:
+
+| Config field | Default | Range | Meaning |
+|---|---|---|---|
+| `guardrailConfidenceThreshold` | 6 | 1–10 | Below this → `NOT_FURNITURE` |
+| `overallConfidenceThreshold` | 4 | 1–10 | Below this → `LOW_CONFIDENCE` (check `overall.confidence`) |
+| `categoryConfidenceThreshold` | 7 | 1–10 | Below this → category filter dropped from L1/L2 |
+| `typeConfidenceThreshold` | 7 | 1–10 | Below this → type filter dropped |
+| `criticCandidateCount` | 10 | 10–50 | Max candidates passed to Stage 4 critic |
 
 ---
 <!-- Add more features following the same structure -->
