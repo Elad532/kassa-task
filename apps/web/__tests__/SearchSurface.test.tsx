@@ -139,7 +139,7 @@ describe('SearchSurface', () => {
         // The controlled input value must not exceed 500 chars
         expect((input as HTMLInputElement).value.length).toBeLessThanOrEqual(500);
         // A visible warning about the truncation must appear
-        expect(screen.getByText(/truncated|limit|500/i)).toBeInTheDocument();
+        expect(screen.getByText(/truncated/i)).toBeInTheDocument();
       });
     });
   });
