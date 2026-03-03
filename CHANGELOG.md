@@ -9,6 +9,7 @@ Every commit section opens with the prompt or intention that created it.
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+  - [(root)/(docs)->docs: update PRD confidence scale and guardrail schema](#rootdocs-docs-update-prd-confidence-scale-and-guardrail-schema)
   - [(web)/(navigation)->feat: implement SearchSurface with file validation and query bar](#webnavigation-feat-implement-searchsurface-with-file-validation-and-query-bar)
   - [(web)/(navigation)->feat: implement NavBar with tab routing and key input](#webnavigation-feat-implement-navbar-with-tab-routing-and-key-input)
   - [(web)/(navigation)->feat: implement apiClient with x-gemini-key header injection](#webnavigation-feat-implement-apiclient-with-x-gemini-key-header-injection)
@@ -19,6 +20,21 @@ Every commit section opens with the prompt or intention that created it.
 ---
 
 ## [Unreleased]
+
+### (root)/(docs)->docs: update PRD confidence scale and guardrail schema
+
+> **Intent:** Standardize quality thresholds in the PRD to a 1–10 integer scale for better consistency with LLM calibration anchors and back-office UI. Enhanced the guardrail schema to support multi-subject detection via `additional_subjects`.
+
+#### Documentation
+##### Changed
+- `docs/PRD.md` — Refactored all confidence thresholds (`overall`, `category`, `type`, `guardrail`) from 0–1 floats to a 1–10 integer scale.
+- `docs/PRD.md` — Updated `GuardrailResponseSchema` to extend `Reasoned` and added the `additional_subjects` field to support scenes with multiple furniture items.
+- `docs/PRD.md` — Updated guardrail prompt instructions to specifically handle foreground vs. background subjects.
+- `docs/PRD.md` — Lowered default `criticCandidateCount` from 25 to 10.
+
+---
+
+
 
 ### (web)/(navigation)->feat: implement SearchSurface with file validation and query bar
 

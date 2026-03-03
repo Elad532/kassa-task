@@ -262,22 +262,26 @@ latency low.
 - [ ] GIVEN the guardrail passes, THEN the vision result is used as Stage 1 output
 - [ ] GIVEN the guardrail call itself fails, THEN the pipeline SHALL stop with a 502
   — do not proceed without validation
-- [ ] The guardrail confidence threshold SHALL be admin-configurable (default 0.6)
+- [ ] The guardrail confidence threshold SHALL be admin-configurable (default 6, range 1–10)
 
 ##### Domain Model
 ```typescript
-const GuardrailResponseSchema = z.object({
-  is_furniture:     z.boolean(),
-  confidence:       z.number().min(0).max(1),
-  reasoning:        z.string().max(80),
-  detected_subject: z.string(),
+const GuardrailResponseSchema = Reasoned.extend({
+  is_furniture:        z.boolean(),
+  detected_subject:    z.string(),
+  additional_subjects: z.array(z.string()),
 });
 ```
+
+`GuardrailResponseSchema` extends `Reasoned` (defined in Stage 1) for a consistent
+confidence shape across all LLM outputs. `additional_subjects` lists other clearly visible
+furniture items in the scene beyond the primary subject; empty when only one item is present.
 
 ##### Edge Cases
 - Guardrail passes but vision call failed independently → 502 `VISION_FAILED`
 - Image contains furniture in the background but not as the primary subject → guardrail
-  prompt instructs: report on the dominant foreground subject only
+  prompt instructs: report on the dominant foreground subject in `detected_subject`; list
+  other visible furniture items in `additional_subjects`; ignore non-furniture background decor
 
 ---
 
@@ -296,19 +300,20 @@ explicitly in the query — the schema must accommodate both sources.
 - [ ] The output SHALL be a single `FurnitureAnalysis` instance, validated by Zod
 - [ ] WHEN the LLM returns invalid JSON, THEN the backend SHALL retry once with a
   stricter prompt before returning 502
-- [ ] Each attribute SHALL carry its own `confidence` (0–1) and `reasoning` (max 80
+- [ ] Each attribute SHALL carry its own `confidence` (1–10) and `reasoning` (max 80
   characters)
 - [ ] `price_range` SHALL be populated when a price appears in the user query OR is
   visible as a price tag in the image; otherwise null
 - [ ] The prompt SHALL be injected with the catalog vocabulary (categories, types,
   styles, materials, colors) to ground outputs in catalog terminology
-- [ ] WHEN `overall_confidence` is below `overallConfidenceThreshold` (default 0.4,
+- [ ] WHEN `overall.confidence` is below `overallConfidenceThreshold` (default 4, range 1–10,
   admin-configurable), THEN a 422 `LOW_CONFIDENCE` is returned before retrieval
 
 ##### Domain Model
 ```typescript
+// Shared base for every LLM-attributed value. confidence uses a 1–10 scale; 7 = genuinely acceptable.
 const Reasoned = z.object({
-  confidence: z.number().min(0).max(1),
+  confidence: z.number().min(1).max(10),
   reasoning:  z.string().max(80),
 });
 
@@ -328,14 +333,14 @@ const PriceRangeAttribute = Reasoned.extend({
 });
 
 const FurnitureAnalysisSchema = z.object({
-  furniture_type:     StringAttribute.nullable(),
-  category:           StringAttribute.nullable(),
-  style_descriptors:  z.array(StringAttribute),
-  materials:          z.array(StringAttribute),
-  color_palette:      z.array(StringAttribute),
-  dimensions:         DimensionsAttribute.nullable(),
-  price_range:        PriceRangeAttribute.nullable(),
-  overall_confidence: z.number().min(0).max(1),
+  furniture_type:    StringAttribute.nullable(),
+  category:          StringAttribute.nullable(),
+  style_descriptors: z.array(StringAttribute),
+  materials:         z.array(StringAttribute),
+  color_palette:     z.array(StringAttribute),
+  dimensions:        DimensionsAttribute.nullable(),
+  price_range:       PriceRangeAttribute.nullable(),
+  overall:           Reasoned,  // holistic confidence that the analysis is usable for retrieval
 });
 
 type FurnitureAnalysis = z.infer<typeof FurnitureAnalysisSchema>;
@@ -347,7 +352,7 @@ log storage, and API response. No duplicate interface definitions exist anywhere
 codebase.
 
 ##### Edge Cases
-- `overall_confidence < overallConfidenceThreshold` → 422 `LOW_CONFIDENCE` before retrieval
+- `overall.confidence < overallConfidenceThreshold` → 422 `LOW_CONFIDENCE` before retrieval
 - All array fields empty and all singular fields null → query influence detection flags
   `no_intent_extracted`
 - User query contradicts the image (e.g. "show me dining tables" with a sofa image) →
@@ -371,6 +376,8 @@ via the embedding space and uses the original unexpanded analysis.
 - [ ] The same `FurnitureAnalysisSchema` SHALL be used for both input and output
 - [ ] The expanded analysis SHALL feed L1 and L2 retrieval; the original unexpanded
   analysis SHALL feed L3
+- [ ] Stage 2 is sequential to L1 and L2 only — L3 starts immediately after Stage 1
+  using the original unexpanded analysis, in parallel with Stage 2 and the L1/L2 calls
 - [ ] WHEN Stage 2 fails, THEN the pipeline SHALL continue with the unexpanded analysis
   — this stage is recoverable
 
@@ -396,6 +403,10 @@ level, though their candidate sets can overlap. L3 (Category B: With Embeddings)
 a separate local mirror. Overlap across any layers is not harmful — a product appearing
 in multiple layers receives a higher RRF score, which is the intended signal.
 
+**Execution order**: L3 starts immediately after Stage 1 using the original unexpanded
+analysis, running in parallel with Stage 2 (expansion) and the subsequent L1/L2 calls.
+L1 and L2 wait for Stage 2 to complete; L3 does not.
+
 ##### Acceptance Criteria
 - [ ] All enabled layers SHALL run in parallel
 - [ ] Candidate count per layer SHALL be admin-configurable (default 50, range 10–200)
@@ -418,7 +429,7 @@ products that structurally match the detected category, type, and optional price
 
 ESR application rules:
 - **E** `category` — applied first if `confidence > categoryConfidenceThreshold`
-  (default 0.85)
+  (default 7, range 1–10)
 - **E** `type` — applied second only when `category` is also active (cannot skip the
   index prefix — applying `type` without `category` forces a full index scan)
 - **R** `price` — applied last only when `price_range` is non-null
@@ -542,7 +553,7 @@ and query anchors the final ranking in genuine visual and semantic relevance.
 - [ ] The critic SHALL receive: the original image, the user query, a summary of the
   merged analysis, the top-N fused candidates as structured text, and each candidate's
   `hitCount` and `layers`
-- [ ] Candidate count sent to the critic SHALL be admin-configurable (default 25,
+- [ ] Candidate count sent to the critic SHALL be admin-configurable (default 10,
   range 10–50) — this cap is a hard constraint; fitting 200 candidates into a single
   LLM context is not reliable at scale
 - [ ] The critic prompt SHALL include a calibration anchor: at most 2 products should
@@ -701,14 +712,14 @@ page exposes all behaviorally significant configuration as a single back-office 
 | `L1CandidateCount` | number | 50 | 10–200 | Candidates from compound index filter |
 | `L2CandidateCount` | number | 50 | 10–200 | Candidates from BM25 template match |
 | `L3CandidateCount` | number | 50 | 10–200 | Candidates from vector search |
-| `criticCandidateCount` | number | 25 | 10–50 | Top fused candidates sent to critic |
+| `criticCandidateCount` | number | 10 | 10–50 | Top fused candidates sent to critic |
 | `maxResults` | number | 10 | 1–25 | Final results shown to user |
 | `rrfK` | number | 60 | 1–200 | RRF damping constant |
 | `minCriticScore` | number | 5 | 1–10 | Minimum score to include in results |
-| `overallConfidenceThreshold` | number | 0.40 | 0–1 | Below this, 422 `LOW_CONFIDENCE` returned |
-| `categoryConfidenceThreshold` | number | 0.85 | 0–1 | Below this, category filter dropped from L1 and L2 |
-| `typeConfidenceThreshold` | number | 0.85 | 0–1 | Below this, type filter dropped |
-| `guardrailConfidenceThreshold` | number | 0.60 | 0–1 | Below this, 422 `NOT_FURNITURE` returned |
+| `overallConfidenceThreshold` | number | 4 | 1–10 | Below this, 422 `LOW_CONFIDENCE` returned |
+| `categoryConfidenceThreshold` | number | 7 | 1–10 | Below this, category filter dropped from L1 and L2 |
+| `typeConfidenceThreshold` | number | 7 | 1–10 | Below this, type filter dropped |
+| `guardrailConfidenceThreshold` | number | 6 | 1–10 | Below this, 422 `NOT_FURNITURE` returned |
 | `vocabularySampleSize` | number | 200 | 50–1000 | Products sampled for style/material/color extraction |
 | `enableL1` | boolean | true | — | Layer toggle |
 | `enableL2` | boolean | true | — | Layer toggle |
