@@ -1,18 +1,9 @@
 import '@testing-library/jest-dom';
 import { apiFetch } from '../lib/apiClient';
 
-// Build a minimal Response-like object that jsdom can use
-function makeFakeResponse(): Response {
-  return {
-    ok: true,
-    status: 200,
-    headers: new Headers(),
-  } as unknown as Response;
-}
-
 describe('apiFetch', () => {
   beforeEach(() => {
-    global.fetch = jest.fn(() => Promise.resolve(makeFakeResponse()));
+    global.fetch = jest.fn(() => Promise.resolve(new Response()));
   });
 
   afterEach(() => {
