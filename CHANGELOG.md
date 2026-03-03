@@ -9,10 +9,107 @@ Every commit section opens with the prompt or intention that created it.
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+  - [(web)/(navigation)->feat: implement SearchSurface with file validation and query bar](#webnavigation-feat-implement-searchsurface-with-file-validation-and-query-bar)
+  - [(web)/(navigation)->feat: implement NavBar with tab routing and key input](#webnavigation-feat-implement-navbar-with-tab-routing-and-key-input)
+  - [(web)/(navigation)->feat: implement apiClient with x-gemini-key header injection](#webnavigation-feat-implement-apiclient-with-x-gemini-key-header-injection)
+  - [(web)/(navigation)->test: add F1-F3 contract tests](#webnavigation-test-add-f1-f3-contract-tests)
+  - [(web)/(navigation)->feat: scaffold NavBar, SearchSurface, ApiKeyContext, apiClient](#webnavigation-feat-scaffold-navbar-searchsurface-apikeycontext-apiclient)
+  - [(web)/(navigation)->feat: define F1-F3 types and contracts](#webnavigation-feat-define-f1-f3-types-and-contracts)
 
 ---
 
 ## [Unreleased]
+
+### (web)/(navigation)->feat: implement SearchSurface with file validation and query bar
+
+> **Prompt:** "Yes" (proceed with Phase 4 implementation)
+> **Intent:** Implement the full SearchSurface component — drag-and-drop file upload, client-side MIME/size validation, live character counter with paste truncation, and FormData submission via apiFetch. Also fixes an ambiguous test regex that matched both the character counter and the paste warning simultaneously.
+
+#### F2 — Search Surface
+##### Added
+- `apps/web/components/SearchSurface.tsx` — full implementation: drag-and-drop + file picker, MIME type validation (JPEG/PNG/WebP only), 10 MB size limit, image preview via `URL.createObjectURL`, 500-character query bar with live counter, paste truncation with visible warning, submit button disabled until image or query present, FormData body with `image` and `userQuery` fields sent via `apiFetch`
+
+##### Changed
+- `apps/web/__tests__/SearchSurface.test.tsx` — narrowed paste-warning assertion from `/truncated|limit|500/i` to `/truncated/i` to avoid ambiguous match with the always-visible `500/500` counter
+
+---
+
+### (web)/(navigation)->feat: implement NavBar with tab routing and key input
+
+> **Prompt:** "Yes" (proceed with Phase 4 implementation)
+> **Intent:** Wire up the NavBar stub — connect API key input to ApiKeyContext so the key is stored in React state only, and use Next.js Link for client-side tab navigation.
+
+#### F1 — Navigation Bar
+##### Changed
+- `apps/web/components/NavBar.tsx` — uses `Link` from `next/link` for End User (`/`) and Admin (`/admin`) tabs; `<input type="password">` `onChange` calls `setApiKey()` from `useApiKey()` context hook
+
+---
+
+### (web)/(navigation)->feat: implement apiClient with x-gemini-key header injection
+
+> **Prompt:** "Yes" (proceed with Phase 4 implementation)
+> **Intent:** Implement the fetch wrapper that injects the user's Gemini API key as an `x-gemini-key` header on every request when a key is present, and omits the header entirely when the key is empty so the backend falls through to the admin key.
+
+#### F3 — API Key Handling
+##### Changed
+- `apps/web/lib/apiClient.ts` — builds a `Headers` object from the incoming `init.headers`, sets `x-gemini-key: <apiKey>` when `apiKey` is non-empty, then passes the merged headers to `fetch()`
+
+---
+
+### (web)/(navigation)->test: add F1-F3 contract tests
+
+> **Prompt:** "Yes" (proceed with Phase 3)
+> **Intent:** Write integration tests that define the public contracts for NavBar, SearchSurface, ApiKeyContext, and apiClient. All tests that require real implementation must fail against the current stubs — confirming that tests drive, not follow, implementation.
+
+#### F1 — Navigation Bar
+##### Added
+- `apps/web/__tests__/NavBar.test.tsx` — 6 contract tests: link text, href attributes, `type="password"`, and `setApiKey` called on input change
+
+#### F2 — Search Surface
+##### Added
+- `apps/web/__tests__/SearchSurface.test.tsx` — 11 contract tests: submit disabled state, MIME validation, size validation, image preview (file input and drop), placeholder text, character counter, paste truncation warning, FormData submission shape
+
+#### F3 — API Key Handling
+##### Added
+- `apps/web/__tests__/ApiKeyContext.test.tsx` — 4 contract tests: initial state, `setApiKey` update, no `localStorage` write, no `sessionStorage` write
+- `apps/web/__tests__/apiClient.test.ts` — 2 contract tests: `x-gemini-key` header injected when key non-empty, omitted when key empty
+
+---
+
+### (web)/(navigation)->feat: scaffold NavBar, SearchSurface, ApiKeyContext, apiClient
+
+> **Prompt:** "Yes" (proceed with Phase 2)
+> **Intent:** Create all skeleton files for F1–F3 — stubbed components that satisfy the type system and compile, but return placeholder responses. Wire ApiKeyProvider and NavBar into the root layout; replace the hello-world home page with SearchSurface.
+
+#### F1 / F2 / F3 — Navigation, Search Surface, API Key Handling
+##### Added
+- `apps/web/context/ApiKeyContext.tsx` — React Context with `useState("")` provider and `useApiKey()` hook (stub always returns empty string)
+- `apps/web/components/NavBar.tsx` — static links and password input, no logic
+- `apps/web/components/SearchSurface.tsx` — drop zone, query input, submit button stub
+- `apps/web/lib/apiClient.ts` — bare `fetch()` pass-through, no header injection
+- `apps/web/app/admin/page.tsx` — placeholder `<main>Admin page</main>`
+
+##### Changed
+- `apps/web/app/layout.tsx` — wraps children in `<ApiKeyProvider>`, renders `<NavBar />` above page content
+- `apps/web/app/page.tsx` — replaces hello-world `fetch('/api/hello')` component with `<SearchSurface />`
+- `apps/web/__tests__/page.test.tsx` — updated smoke test to match new home page content
+
+---
+
+### (web)/(navigation)->feat: define F1-F3 types and contracts
+
+> **Prompt:** "let's plan how to implement F1 to F3 - navigation bar, search surface, and API key handling"
+> **Intent:** Establish the shared domain types for F1–F3 before writing any implementation. ProviderKeys is a backend-visible shared type and belongs in packages/common; SearchFormState uses the browser-only File type and stays in the web app.
+
+#### F1 / F2 / F3 — Navigation, Search Surface, API Key Handling
+##### Added
+- `packages/common/src/search.schema.ts` — `ProviderKeys` interface `{ gemini: string | null, openai: string | null }` — shared domain model for per-request key resolution; user keys ephemeral, admin keys persisted server-side (F7)
+- `apps/web/types/search.ts` — `SearchFormState` interface `{ image: File | null, query: string }` — web-only because `File` is a browser DOM type unavailable in the Node build of `packages/common`
+
+##### Changed
+- `packages/common/src/index.ts` — exports `ProviderKeys` from the new `search.schema` module
+
+---
 
 ### (root)/(docs)->docs: add table of contents to all human-facing documents
 

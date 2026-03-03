@@ -115,4 +115,90 @@ HTTP Request
 - `MongooseModule.forRoot()` lives inside `CatalogModule`, not `AppModule`
 
 ---
+
+### Feature: Navigation, Search Surface, and API Key Handling (F1–F3)
+
+#### Architecture Decision
+
+F1–F3 are pure frontend concerns. The shared domain type (`ProviderKeys`) lives in `packages/common`; all React-specific implementation lives in `apps/web`.
+
+User-supplied API keys are **ephemeral only** — held in React state for the browser session and sent on every request as an HTTP header. They are never written to `localStorage`, `sessionStorage`, or any persistent store. Admin-configured keys are a backend concern (F7) persisted to local MongoDB; the frontend has no involvement in admin key storage.
+
+#### Component Tree
+
+```
+RootLayout (app/layout.tsx)          ← server component
+  └── ApiKeyProvider (context/)      ← 'use client', React state
+        ├── NavBar (components/)     ← 'use client', tabs + key input
+        └── {page children}
+              └── SearchSurface      ← 'use client', upload + query
+```
+
+#### Routing
+
+| Route | Component | Purpose |
+|---|---|---|
+| `/` | `app/page.tsx` → `SearchSurface` | End-user search |
+| `/admin` | `app/admin/page.tsx` | Admin configuration (F7, placeholder) |
+
+#### State & Data Flow
+
+```
+User types API key
+  → NavBar onChange → setApiKey() → ApiKeyContext state
+
+User submits search form
+  → SearchSurface handleSubmit
+  → builds FormData { image?, userQuery }
+  → apiFetch('/api/match', { body: formData }, apiKey)
+      → adds x-gemini-key header if apiKey non-empty
+      → fetch()
+
+Backend receives request
+  → extracts x-gemini-key per-request
+  → resolves ProviderKeys { gemini, openai }
+  → never logs or caches keys
+```
+
+#### API Key Transport
+
+- Frontend sends `x-gemini-key: <key>` header when a user key is present
+- Header is omitted when `apiKey === ''`; backend falls through to admin key
+- The `x-openai-key` header is reserved for admin-configured fallback (F7); not sent by the frontend NavBar
+
+#### File Validation (client-side, before upload)
+
+| Rule | Value |
+|---|---|
+| Accepted MIME types | `image/jpeg`, `image/png`, `image/webp` |
+| Max file size | 10 MB (`10 * 1024 * 1024` bytes) |
+| Enforcement point | `SearchSurface.handleFile()` — before any state update |
+
+#### Query Bar
+
+- 500-character hard limit enforced on every `onChange` keystroke (`value.slice(0, 500)`)
+- Paste handler intercepts oversized paste, truncates, shows visible warning
+- Live counter rendered as `{query.length}/500`
+
+#### Key Files
+
+| File | Purpose |
+|---|---|
+| `packages/common/src/search.schema.ts` | `ProviderKeys` shared domain type |
+| `apps/web/types/search.ts` | `SearchFormState` (web-only — uses DOM `File`) |
+| `apps/web/context/ApiKeyContext.tsx` | React Context + `useApiKey()` hook |
+| `apps/web/lib/apiClient.ts` | Fetch wrapper that injects `x-gemini-key` |
+| `apps/web/components/NavBar.tsx` | Tab navigation + API key input |
+| `apps/web/components/SearchSurface.tsx` | Image upload + query bar + submit |
+
+#### Dependencies
+
+No new dependencies added. All APIs are natively available:
+- Drag-and-drop: HTML5 native drag events
+- File validation: `File.type`, `File.size`, `URL.createObjectURL`
+- Routing: `next/link`, `next/navigation` — already in Next.js 14
+- State: React `useState`, `createContext`, `useContext` — built-in
+- Form data: native `FormData`
+
+---
 <!-- Add more features following the same structure -->
