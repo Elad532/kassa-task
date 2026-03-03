@@ -14,3 +14,5 @@ export type {
   ProductFilter,
   ProductSearch,
 } from './product.schema';
+
+export type { ProviderKeys } from './search.schema';
