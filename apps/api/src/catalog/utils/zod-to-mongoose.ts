@@ -19,7 +19,7 @@ function zodFieldToMongoose(type: z.ZodTypeAny): MongooseFieldDef {
   if (type instanceof z.ZodDate) return { type: Date, required: true };
   if (type instanceof z.ZodArray) {
     const inner = zodFieldToMongoose(type.element as z.ZodTypeAny);
-    return { type: [inner.type as typeof String | typeof Number], required: true };
+    return { type: [inner.type] as (typeof String)[] | (typeof Number)[], required: true };
   }
   if (type instanceof z.ZodOptional) {
     return { ...zodFieldToMongoose(type.unwrap() as z.ZodTypeAny), required: false };

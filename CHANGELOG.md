@@ -9,6 +9,7 @@ Every commit section opens with the prompt or intention that created it.
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+  - [(common,api)/(match)->feat: define Stage 2 and L3 types, modules, and public contracts](#commonapimatch-feat-define-stage-2-and-l3-types-modules-and-public-contracts)
   - [(root)/(docs)->docs: define Stage 2 and L3 architecture in TECH_SPEC with Mermaid diagrams](#rootdocs-docs-define-stage-2-and-l3-architecture-in-tech_spec-with-mermaid-diagrams)
   - [(root)/(docs)->docs: update PRD confidence scale and guardrail schema](#rootdocs-docs-update-prd-confidence-scale-and-guardrail-schema)
   - [(web)/(infra)->chore: add missing jest and mocha types](#webinfra-chore-add-missing-jest-and-mocha-types)
@@ -22,6 +23,34 @@ Every commit section opens with the prompt or intention that created it.
 ---
 
 ## [Unreleased]
+
+### (common,api)/(match)->feat: define Stage 2 and L3 types, modules, and public contracts
+
+> **Intent:** Phase 1 (Domain Modeling) for Stage 2 (Vocabulary Expansion) and Stage 3 L3 (Vector Search on Local Mirror). Define all Zod schemas in `packages/common`, create stub NestJS modules (`MirrorModule`, `VocabularyModule`, `EmbeddingsModule`, `VocabularyExpansionModule`) with full public API signatures but no business logic, and wire them into `AppModule`.
+
+#### Stage 2 — Vocabulary Expansion
+##### Added
+- `packages/common/src/vocabulary.schema.ts` — `CatalogVocabularySchema` (singleton document shape: categories, types, styles, materials, colors, refreshedAt) and `ProductEmbeddingSchema` (product_id, category, type, price, 768-dim embedding vector, embedded_text, timestamps)
+- `apps/api/src/mirror/mirror.module.ts` — `MirrorModule` with `connectionName: 'local'` for local MongoDB; imports and exports `VocabularyModule` and `EmbeddingsModule`
+- `apps/api/src/mirror/vocabulary/vocabulary.module.ts` — `VocabularyModule`; `forFeature` bound to `'local'` connection; exports `VocabularyService`
+- `apps/api/src/mirror/vocabulary/vocabulary.service.ts` — stub `VocabularyService` with `getVocabulary(maxAgeMs?)` and `refresh(sampleSize?)` signatures
+- `apps/api/src/mirror/vocabulary/schemas/catalog-vocabulary.schema.ts` — manual Mongoose schema with `_id: String` (singleton pattern, `ObjectId` explicitly not used); Zod schema intentionally omits `_id`
+- `apps/api/src/pipeline/vocabulary-expansion/vocabulary-expansion.module.ts` — `VocabularyExpansionModule`; exports `VocabularyExpansionService`
+- `apps/api/src/pipeline/vocabulary-expansion/vocabulary-expansion.service.ts` — stub `VocabularyExpansionService.expand(analysis, vocabulary)` — never throws; returns original analysis on any error
+
+#### Stage 3 L3 — Vector Search on Local Mirror
+##### Added
+- `apps/api/src/mirror/embeddings/embeddings.module.ts` — `EmbeddingsModule`; `forFeature` bound to `'local'` connection; exports `EmbeddingsService`
+- `apps/api/src/mirror/embeddings/embeddings.service.ts` — stub `EmbeddingsService` with `isReady()`, `reconstructProse(analysis)`, and `search(analysis, candidateCount, priceRange?, categoryFilter?)` signatures; documents that L3 always uses the **original unexpanded** analysis from Stage 1
+- `apps/api/src/mirror/embeddings/schemas/product-embedding.schema.ts` — manual Mongoose schema (manual because `zodToMongooseSchema` does not yet handle `z.array(z.number())` for the 768-dim vector); compound index on `{ category: 1, price: 1 }` for `$vectorSearch` pre-filtering
+
+##### Changed
+- `packages/common/src/analysis.schema.ts` — `ReasonedSchema`, `StringAttributeSchema`, `DimensionsAttributeSchema`, `PriceRangeAttributeSchema`, `FurnitureAnalysisSchema`, `GuardrailResponseSchema` extracted into dedicated file (mirrors `f4-stage0-domain` design, adapted for this branch)
+- `packages/common/src/index.ts` — exports all new schemas and types from `analysis.schema.ts` and `vocabulary.schema.ts`
+- `apps/api/src/app.module.ts` — imports `MirrorModule` and `VocabularyExpansionModule`
+- `apps/api/src/catalog/utils/zod-to-mongoose.ts` — fixed `type.unwrap()` cast to `z.ZodTypeAny` to resolve Zod v4 compatibility (returns `$ZodType`, not `ZodTypeAny`)
+
+---
 
 ### (root)/(docs)->docs: define Stage 2 and L3 architecture in TECH_SPEC with Mermaid diagrams
 
