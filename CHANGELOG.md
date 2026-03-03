@@ -9,6 +9,7 @@ Every commit section opens with the prompt or intention that created it.
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+  - [(api)/(mirror)->feat: scaffold MirrorModule, VocabularyService, EmbeddingsService stubs](#apimirror-feat-scaffold-mirrormodule-vocabularyservice-embeddingsservice-stubs)
   - [(common,api)/(match)->feat: define Stage 2 and L3 types, modules, and public contracts](#commonapimatch-feat-define-stage-2-and-l3-types-modules-and-public-contracts)
   - [(root)/(docs)->docs: define Stage 2 and L3 architecture in TECH_SPEC with Mermaid diagrams](#rootdocs-docs-define-stage-2-and-l3-architecture-in-tech_spec-with-mermaid-diagrams)
   - [(root)/(docs)->docs: update PRD confidence scale and guardrail schema](#rootdocs-docs-update-prd-confidence-scale-and-guardrail-schema)
@@ -23,6 +24,24 @@ Every commit section opens with the prompt or intention that created it.
 ---
 
 ## [Unreleased]
+
+### (api)/(mirror)->feat: scaffold MirrorModule, VocabularyService, EmbeddingsService stubs
+
+> **Intent:** Phase 2 (Skeleton) — replace `throw new Error('Not implemented')` bodies with minimal stubs that compile and satisfy the type system without real data or logic. Contract tests written in Phase 3 will fail against these stubs (by design).
+
+#### Stage 2 — Vocabulary Expansion
+##### Changed
+- `VocabularyService.getVocabulary()` — returns a hardcoded empty `CatalogVocabulary` stub (all arrays empty, `refreshedAt: new Date(0)`) instead of throwing
+- `VocabularyService.refresh()` — returns same empty stub instead of throwing
+- `VocabularyExpansionService.expand()` — returns `analysis` unchanged (this IS the production fallback behavior; Phase 3 tests will assert the actual mapping logic is missing)
+
+#### Stage 3 L3 — Vector Search on Local Mirror
+##### Changed
+- `EmbeddingsService.isReady()` — returns `false` instead of throwing
+- `EmbeddingsService.reconstructProse()` — returns static string `'furniture item'` instead of throwing; output intentionally contains no JSON syntax
+- `EmbeddingsService.search()` — returns `[]` instead of throwing
+
+---
 
 ### (common,api)/(match)->feat: define Stage 2 and L3 types, modules, and public contracts
 

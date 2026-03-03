@@ -13,8 +13,8 @@ export class VocabularyExpansionService {
    */
   async expand(
     analysis: FurnitureAnalysis,
-    vocabulary: CatalogVocabulary,
+    _vocabulary: CatalogVocabulary,
   ): Promise<FurnitureAnalysis> {
-    throw new Error('Not implemented');
+    return analysis;
   }
 }

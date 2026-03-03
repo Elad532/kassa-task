@@ -26,7 +26,7 @@ export class EmbeddingsService {
    * $vectorSearch is available (i.e. using mongodb-atlas-local image).
    */
   async isReady(): Promise<boolean> {
-    throw new Error('Not implemented');
+    return false;
   }
 
   /**
@@ -37,8 +37,8 @@ export class EmbeddingsService {
    * L3 calls this with the ORIGINAL unexpanded analysis from Stage 1.
    * It never receives the Stage 2 expanded analysis.
    */
-  reconstructProse(analysis: FurnitureAnalysis): string {
-    throw new Error('Not implemented');
+  reconstructProse(_analysis: FurnitureAnalysis): string {
+    return 'furniture item';
   }
 
   /**
@@ -51,11 +51,11 @@ export class EmbeddingsService {
    * @param categoryFilter Optional category string applied as $vectorSearch pre-filter
    */
   async search(
-    analysis: FurnitureAnalysis,
-    candidateCount: number,
-    priceRange?: PriceRange,
-    categoryFilter?: string,
+    _analysis: FurnitureAnalysis,
+    _candidateCount: number,
+    _priceRange?: PriceRange,
+    _categoryFilter?: string,
   ): Promise<string[]> {
-    throw new Error('Not implemented');
+    return [];
   }
 }

@@ -20,15 +20,26 @@ export class VocabularyService {
    * Returns the current catalog vocabulary, refreshing if absent or stale.
    * @param maxAgeMs Maximum age in milliseconds before a refresh is triggered (default 24 h)
    */
-  async getVocabulary(maxAgeMs?: number): Promise<CatalogVocabulary> {
-    throw new Error('Not implemented');
+  async getVocabulary(_maxAgeMs?: number): Promise<CatalogVocabulary> {
+    return this.stubVocabulary();
   }
 
   /**
    * Re-extracts vocabulary from Atlas and upserts the singleton document.
    * @param sampleSize Number of product documents to sample for style/material/color extraction
    */
-  async refresh(sampleSize?: number): Promise<CatalogVocabulary> {
-    throw new Error('Not implemented');
+  async refresh(_sampleSize?: number): Promise<CatalogVocabulary> {
+    return this.stubVocabulary();
+  }
+
+  private stubVocabulary(): CatalogVocabulary {
+    return {
+      categories: [],
+      types: [],
+      styles: [],
+      materials: [],
+      colors: [],
+      refreshedAt: new Date(0),
+    };
   }
 }
