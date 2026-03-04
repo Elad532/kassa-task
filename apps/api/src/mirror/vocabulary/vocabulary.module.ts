@@ -5,6 +5,8 @@ import {
   CATALOG_VOCABULARY_MODEL,
   CatalogVocabularyMongooseSchema,
 } from './schemas/catalog-vocabulary.schema';
+import { PRODUCT_MODEL } from '../../catalog/catalog.service';
+import { ProductMongooseSchema } from '../../catalog/schemas/product.schema';
 
 @Module({
   imports: [
@@ -14,6 +16,10 @@ import {
       [{ name: CATALOG_VOCABULARY_MODEL, schema: CatalogVocabularyMongooseSchema }],
       'local',
     ),
+    // Atlas Product model — default connection (no connectionName).
+    // VocabularyService.refresh() uses this to query distinct category/type terms.
+    // The default connection is established by CatalogModule in AppModule.
+    MongooseModule.forFeature([{ name: PRODUCT_MODEL, schema: ProductMongooseSchema }]),
   ],
   providers: [VocabularyService],
   exports: [VocabularyService],

@@ -9,6 +9,7 @@ Every commit section opens with the prompt or intention that created it.
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+  - [(api)/(pipeline)->feat: implement VocabularyService, VocabularyExpansionService, EmbeddingsService](#apipipeline-feat-implement-vocabularyservice-vocabularyexpansionservice-embeddingsservice)
   - [(api)/(pipeline)->test: add contract tests for VocabularyService, EmbeddingsService, VocabularyExpansionService](#apipipeline-test-add-contract-tests-for-vocabularyservice-embeddingsservice-vocabularyexpansionservice)
   - [(api)/(mirror)->feat: scaffold MirrorModule, VocabularyService, EmbeddingsService stubs](#apimirror-feat-scaffold-mirrormodule-vocabularyservice-embeddingsservice-stubs)
   - [(common,api)/(match)->feat: define Stage 2 and L3 types, modules, and public contracts](#commonapimatch-feat-define-stage-2-and-l3-types-modules-and-public-contracts)
@@ -25,6 +26,32 @@ Every commit section opens with the prompt or intention that created it.
 ---
 
 ## [Unreleased]
+
+### (api)/(pipeline)->feat: implement VocabularyService, VocabularyExpansionService, EmbeddingsService
+
+> **Intent:** Phase 4 (Implementation) — replace Phase 2 stubs with real business logic. All 10 previously failing contract tests now pass. Add `@langchain/google-genai` for Gemini Flash (Stage 2) and text-embedding-004 (Stage 3 L3). Update README and module providers.
+
+#### Stage 2 — Vocabulary Expansion
+##### Added
+- `@langchain/google-genai` added to `apps/api` dependencies — provides `ChatGoogleGenerativeAI` (Stage 2) and `GoogleGenerativeAIEmbeddings` (Stage 3 L3)
+- `GEMINI_API_KEY` and `LOCAL_MONGODB_URI` env vars documented in `README.md`
+
+##### Changed
+- `VocabularyService.getVocabulary(maxAgeMs?)` — reads singleton doc from local MongoDB; triggers `refresh()` when absent or when `Date.now() - refreshedAt > maxAgeMs` (default 24 h)
+- `VocabularyService.refresh()` — queries Atlas `distinct('category')` and `distinct('type')` in parallel; upserts `{ _id: 'singleton' }` to local MongoDB; returns the new vocabulary
+- `VocabularyModule` — registers Atlas `Product` model (default connection) so `VocabularyService.refresh()` can query distinct terms
+- `VocabularyExpansionService.expand(analysis, vocabulary)` — per-field case-insensitive match (furniture_type → vocabulary.types, category → vocabulary.categories, etc.); batches non-matching terms to Gemini Flash via `withStructuredOutput(MappingSchema)`; NEVER throws — returns original on any error
+- `VocabularyExpansionModule` — provides `'GEMINI_FLASH_LLM'` token: `ChatGoogleGenerativeAI('gemini-2.0-flash').withStructuredOutput(MappingSchema)`
+
+#### Stage 3 L3 — Vector Search on Local Mirror
+##### Changed
+- `EmbeddingsService.isReady()` — returns `countDocuments() > 0`
+- `EmbeddingsService.reconstructProse(analysis)` — natural-language join of non-null fields; no JSON syntax, safe for embedding
+- `EmbeddingsService.search(analysis, candidateCount, priceRange?, categoryFilter?)` — `embedQuery(prose)` → `$vectorSearch` with `numCandidates = 3 × candidateCount`; price/category pre-filters; returns `product_id[]` sliced to `candidateCount`
+- `EmbeddingsService.onModuleInit()` — creates HNSW vector index (`embedding_hnsw`); swallows "already exists" errors; requires `mongodb/mongodb-atlas-local:7.0`
+- `EmbeddingsModule` — provides `'EMBEDDINGS_CLIENT'` token: `GoogleGenerativeAIEmbeddings({ model: 'text-embedding-004' })`
+
+---
 
 ### (api)/(pipeline)->test: add contract tests for VocabularyService, EmbeddingsService, VocabularyExpansionService
 

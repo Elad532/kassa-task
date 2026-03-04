@@ -35,7 +35,9 @@ cp apps/api/.env.example apps/api/.env
 
 | Variable | Required | Description |
 |---|---|---|
-| `MONGODB_URI` | Yes | MongoDB connection string (Atlas or local) |
+| `MONGODB_URI` | Yes | MongoDB Atlas connection string |
+| `LOCAL_MONGODB_URI` | No | Local MongoDB URI (default: `mongodb://localhost:27017/kassa`) — used by MirrorModule for vocabulary + embeddings |
+| `GEMINI_API_KEY` | Yes (for AI features) | Google Gemini API key — used by Stage 2 vocabulary expansion and Stage 3 L3 vector search |
 
 ## New Dependencies
 
@@ -45,6 +47,7 @@ cp apps/api/.env.example apps/api/.env
 | `nestjs-zod` | `apps/api` | Generates NestJS DTOs from Zod schemas |
 | `@nestjs/config` | `apps/api` | Loads `.env` via `ConfigModule` |
 | `mongodb-memory-server` | `apps/api` (dev) | In-memory MongoDB for unit tests |
+| `@langchain/google-genai` | `apps/api` | Gemini Flash (Stage 2 vocabulary mapping) + text-embedding-004 (Stage 3 L3 vector search) |
 
 ## Setup
 

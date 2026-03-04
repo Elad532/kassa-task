@@ -13,7 +13,8 @@
   "dependencies": {
     "@kassa-task/common": "workspace:*",
     "@langchain/community": "^1.1.18",
-    "@langchain/core": "^1.1.27",
+    "@langchain/core": "^1.1.29",
+    "@langchain/google-genai": "^2.1.23",
     "@langchain/langgraph": "^1.1.5",
     "@nestjs/common": "^10.3.10",
     "@nestjs/config": "^4.0.3",

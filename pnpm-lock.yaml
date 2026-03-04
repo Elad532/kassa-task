@@ -19,13 +19,16 @@ importers:
         version: link:../../packages/common
       '@langchain/community':
         specifier: ^1.1.18
-        version: 1.1.18(@browserbasehq/sdk@2.6.0)(@browserbasehq/stagehand@1.14.0(@playwright/test@1.58.2)(deepmerge@4.3.1)(dotenv@17.2.3)(openai@6.24.0(ws@8.19.0)(zod@4.3.6))(zod@4.3.6))(@ibm-cloud/watsonx-ai@1.7.8)(@langchain/core@1.1.27(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))(ibm-cloud-sdk-core@5.4.7)(jsdom@20.0.3)(jsonwebtoken@9.0.3)(lodash@4.17.23)(openai@6.24.0(ws@8.19.0)(zod@4.3.6))(playwright@1.58.2)(ws@8.19.0)
+        version: 1.1.18(@browserbasehq/sdk@2.6.0)(@browserbasehq/stagehand@1.14.0(@playwright/test@1.58.2)(deepmerge@4.3.1)(dotenv@17.2.3)(openai@6.24.0(ws@8.19.0)(zod@4.3.6))(zod@4.3.6))(@ibm-cloud/watsonx-ai@1.7.8)(@langchain/core@1.1.29(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))(ibm-cloud-sdk-core@5.4.7)(jsdom@20.0.3)(jsonwebtoken@9.0.3)(lodash@4.17.23)(openai@6.24.0(ws@8.19.0)(zod@4.3.6))(playwright@1.58.2)(ws@8.19.0)
       '@langchain/core':
-        specifier: ^1.1.27
-        version: 1.1.27(openai@6.24.0(ws@8.19.0)(zod@4.3.6))
+        specifier: ^1.1.29
+        version: 1.1.29(openai@6.24.0(ws@8.19.0)(zod@4.3.6))
+      '@langchain/google-genai':
+        specifier: ^2.1.23
+        version: 2.1.23(@langchain/core@1.1.29(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))
       '@langchain/langgraph':
         specifier: ^1.1.5
-        version: 1.1.5(@langchain/core@1.1.27(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(zod-to-json-schema@3.25.1(zod@4.3.6))(zod@4.3.6)
+        version: 1.1.5(@langchain/core@1.1.29(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(zod-to-json-schema@3.25.1(zod@4.3.6))(zod@4.3.6)
       '@nestjs/common':
         specifier: ^10.3.10
         version: 10.4.22(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -43,7 +46,7 @@ importers:
         version: 10.4.22(@nestjs/common@10.4.22(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@10.4.22)
       langchain:
         specifier: ^1.2.26
-        version: 1.2.26(@langchain/core@1.1.27(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))(openai@6.24.0(ws@8.19.0)(zod@4.3.6))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(zod-to-json-schema@3.25.1(zod@4.3.6))
+        version: 1.2.26(@langchain/core@1.1.29(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))(openai@6.24.0(ws@8.19.0)(zod@4.3.6))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(zod-to-json-schema@3.25.1(zod@4.3.6))
       mongoose:
         specifier: ^9.2.2
         version: 9.2.2
@@ -597,6 +600,10 @@ packages:
     resolution: {integrity: sha512-d9zaMRSTIKDLhctzH12MtXvJKSSUhaHcjV+2Z+GK+EEY7XKpP5yR4x+N3TAcHTcu963nIr+TMcCb4DBCYX1z6Q==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
 
+  '@google/generative-ai@0.24.1':
+    resolution: {integrity: sha512-MqO+MLfM6kjxcKoy0p1wRzG3b4ZZXtPI+z2IE26UogS2Cm/XHO+7gGRBh6gcJsOiIVoH93UwKvW4HdgiOZCy9Q==}
+    engines: {node: '>=18.0.0'}
+
   '@humanwhocodes/config-array@0.13.0':
     resolution: {integrity: sha512-DZLEEqFWQFiyK6h5YIeynKx7JlvCYWL0cImfSRXZ9l4Sg2efkFGTuFf6vzXjK1cq6IYkU+Eg/JizXw+TD2vRNw==}
     engines: {node: '>=10.10.0'}
@@ -1095,9 +1102,15 @@ packages:
       youtubei.js:
         optional: true
 
-  '@langchain/core@1.1.27':
-    resolution: {integrity: sha512-YVtEz3nqCh8WxtdVXUICmt2BR2An+mn4YRJUBwcHX47Yrh2VwxpO0l97B2N/sNi658m65HnGyz2/hAjF3fzc1w==}
+  '@langchain/core@1.1.29':
+    resolution: {integrity: sha512-BPoegTtIdZX4gl2kxcSXAlLrrJFl1cxeRsk9DM/wlIuvyPrFwjWqrEK5NwF5diDt5XSArhQxIFaifGAl4F7fgw==}
     engines: {node: '>=20'}
+
+  '@langchain/google-genai@2.1.23':
+    resolution: {integrity: sha512-FYdKFjW4qsEu9sowuoTJSOqDlbBB/6s1NM9pMWU4jJCyo4uiHZ2Y9MNt+K30Prn5/Y99o4HJ7jxiCQbCV+ehmA==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      '@langchain/core': ^1.1.29
 
   '@langchain/langgraph-checkpoint@1.0.0':
     resolution: {integrity: sha512-xrclBGvNCXDmi0Nz28t3vjpxSH6UYx6w5XAXSiiB1WEdc2xD2iY/a913I3x3a31XpInUW/GGfXXfePfaghV54A==}
@@ -5199,6 +5212,10 @@ packages:
     resolution: {integrity: sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==}
     hasBin: true
 
+  uuid@11.1.0:
+    resolution: {integrity: sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A==}
+    hasBin: true
+
   uuid@13.0.0:
     resolution: {integrity: sha512-XQegIaBTVUjSHliKqcnFqYypAd4S+WCYt5NIeRs6w/UAry7z8Y9j5ZwRRL4kzq9U3sD6v+85er9FvkEaBpji2w==}
     hasBin: true
@@ -5784,6 +5801,8 @@ snapshots:
 
   '@eslint/js@8.57.1': {}
 
+  '@google/generative-ai@0.24.1': {}
+
   '@humanwhocodes/config-array@0.13.0':
     dependencies:
       '@humanwhocodes/object-schema': 2.0.3
@@ -6015,11 +6034,11 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@langchain/classic@1.0.19(@langchain/core@1.1.27(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))(openai@6.24.0(ws@8.19.0)(zod@4.3.6))(ws@8.19.0)':
+  '@langchain/classic@1.0.19(@langchain/core@1.1.29(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))(openai@6.24.0(ws@8.19.0)(zod@4.3.6))(ws@8.19.0)':
     dependencies:
-      '@langchain/core': 1.1.27(openai@6.24.0(ws@8.19.0)(zod@4.3.6))
-      '@langchain/openai': 1.2.9(@langchain/core@1.1.27(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))(ws@8.19.0)
-      '@langchain/textsplitters': 1.0.1(@langchain/core@1.1.27(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))
+      '@langchain/core': 1.1.29(openai@6.24.0(ws@8.19.0)(zod@4.3.6))
+      '@langchain/openai': 1.2.9(@langchain/core@1.1.29(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))(ws@8.19.0)
+      '@langchain/textsplitters': 1.0.1(@langchain/core@1.1.29(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))
       handlebars: 4.7.8
       js-yaml: 4.1.1
       jsonpointer: 5.0.1
@@ -6036,13 +6055,13 @@ snapshots:
       - openai
       - ws
 
-  '@langchain/community@1.1.18(@browserbasehq/sdk@2.6.0)(@browserbasehq/stagehand@1.14.0(@playwright/test@1.58.2)(deepmerge@4.3.1)(dotenv@17.2.3)(openai@6.24.0(ws@8.19.0)(zod@4.3.6))(zod@4.3.6))(@ibm-cloud/watsonx-ai@1.7.8)(@langchain/core@1.1.27(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))(ibm-cloud-sdk-core@5.4.7)(jsdom@20.0.3)(jsonwebtoken@9.0.3)(lodash@4.17.23)(openai@6.24.0(ws@8.19.0)(zod@4.3.6))(playwright@1.58.2)(ws@8.19.0)':
+  '@langchain/community@1.1.18(@browserbasehq/sdk@2.6.0)(@browserbasehq/stagehand@1.14.0(@playwright/test@1.58.2)(deepmerge@4.3.1)(dotenv@17.2.3)(openai@6.24.0(ws@8.19.0)(zod@4.3.6))(zod@4.3.6))(@ibm-cloud/watsonx-ai@1.7.8)(@langchain/core@1.1.29(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))(ibm-cloud-sdk-core@5.4.7)(jsdom@20.0.3)(jsonwebtoken@9.0.3)(lodash@4.17.23)(openai@6.24.0(ws@8.19.0)(zod@4.3.6))(playwright@1.58.2)(ws@8.19.0)':
     dependencies:
       '@browserbasehq/stagehand': 1.14.0(@playwright/test@1.58.2)(deepmerge@4.3.1)(dotenv@17.2.3)(openai@6.24.0(ws@8.19.0)(zod@4.3.6))(zod@4.3.6)
       '@ibm-cloud/watsonx-ai': 1.7.8
-      '@langchain/classic': 1.0.19(@langchain/core@1.1.27(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))(openai@6.24.0(ws@8.19.0)(zod@4.3.6))(ws@8.19.0)
-      '@langchain/core': 1.1.27(openai@6.24.0(ws@8.19.0)(zod@4.3.6))
-      '@langchain/openai': 1.2.9(@langchain/core@1.1.27(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))(ws@8.19.0)
+      '@langchain/classic': 1.0.19(@langchain/core@1.1.29(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))(openai@6.24.0(ws@8.19.0)(zod@4.3.6))(ws@8.19.0)
+      '@langchain/core': 1.1.29(openai@6.24.0(ws@8.19.0)(zod@4.3.6))
+      '@langchain/openai': 1.2.9(@langchain/core@1.1.29(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))(ws@8.19.0)
       binary-extensions: 2.3.0
       flat: 5.0.2
       ibm-cloud-sdk-core: 5.4.7
@@ -6064,7 +6083,7 @@ snapshots:
       - '@opentelemetry/sdk-trace-base'
       - peggy
 
-  '@langchain/core@1.1.27(openai@6.24.0(ws@8.19.0)(zod@4.3.6))':
+  '@langchain/core@1.1.29(openai@6.24.0(ws@8.19.0)(zod@4.3.6))':
     dependencies:
       '@cfworker/json-schema': 4.1.1
       ansi-styles: 5.2.0
@@ -6074,7 +6093,7 @@ snapshots:
       langsmith: 0.5.6(openai@6.24.0(ws@8.19.0)(zod@4.3.6))
       mustache: 4.2.0
       p-queue: 6.6.2
-      uuid: 10.0.0
+      uuid: 11.1.0
       zod: 4.3.6
     transitivePeerDependencies:
       - '@opentelemetry/api'
@@ -6082,27 +6101,33 @@ snapshots:
       - '@opentelemetry/sdk-trace-base'
       - openai
 
-  '@langchain/langgraph-checkpoint@1.0.0(@langchain/core@1.1.27(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))':
+  '@langchain/google-genai@2.1.23(@langchain/core@1.1.29(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))':
     dependencies:
-      '@langchain/core': 1.1.27(openai@6.24.0(ws@8.19.0)(zod@4.3.6))
+      '@google/generative-ai': 0.24.1
+      '@langchain/core': 1.1.29(openai@6.24.0(ws@8.19.0)(zod@4.3.6))
+      uuid: 11.1.0
+
+  '@langchain/langgraph-checkpoint@1.0.0(@langchain/core@1.1.29(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))':
+    dependencies:
+      '@langchain/core': 1.1.29(openai@6.24.0(ws@8.19.0)(zod@4.3.6))
       uuid: 10.0.0
 
-  '@langchain/langgraph-sdk@2.0.0(@langchain/core@1.1.27(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@langchain/langgraph-sdk@2.0.0(@langchain/core@1.1.29(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@types/json-schema': 7.0.15
       p-queue: 9.1.0
       p-retry: 7.1.1
       uuid: 13.0.0
     optionalDependencies:
-      '@langchain/core': 1.1.27(openai@6.24.0(ws@8.19.0)(zod@4.3.6))
+      '@langchain/core': 1.1.29(openai@6.24.0(ws@8.19.0)(zod@4.3.6))
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@langchain/langgraph@1.1.5(@langchain/core@1.1.27(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(zod-to-json-schema@3.25.1(zod@4.3.6))(zod@4.3.6)':
+  '@langchain/langgraph@1.1.5(@langchain/core@1.1.29(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(zod-to-json-schema@3.25.1(zod@4.3.6))(zod@4.3.6)':
     dependencies:
-      '@langchain/core': 1.1.27(openai@6.24.0(ws@8.19.0)(zod@4.3.6))
-      '@langchain/langgraph-checkpoint': 1.0.0(@langchain/core@1.1.27(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))
-      '@langchain/langgraph-sdk': 2.0.0(@langchain/core@1.1.27(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@langchain/core': 1.1.29(openai@6.24.0(ws@8.19.0)(zod@4.3.6))
+      '@langchain/langgraph-checkpoint': 1.0.0(@langchain/core@1.1.29(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))
+      '@langchain/langgraph-sdk': 2.0.0(@langchain/core@1.1.29(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@standard-schema/spec': 1.1.0
       uuid: 10.0.0
       zod: 4.3.6
@@ -6112,18 +6137,18 @@ snapshots:
       - react
       - react-dom
 
-  '@langchain/openai@1.2.9(@langchain/core@1.1.27(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))(ws@8.19.0)':
+  '@langchain/openai@1.2.9(@langchain/core@1.1.29(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))(ws@8.19.0)':
     dependencies:
-      '@langchain/core': 1.1.27(openai@6.24.0(ws@8.19.0)(zod@4.3.6))
+      '@langchain/core': 1.1.29(openai@6.24.0(ws@8.19.0)(zod@4.3.6))
       js-tiktoken: 1.0.21
       openai: 6.24.0(ws@8.19.0)(zod@4.3.6)
       zod: 4.3.6
     transitivePeerDependencies:
       - ws
 
-  '@langchain/textsplitters@1.0.1(@langchain/core@1.1.27(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))':
+  '@langchain/textsplitters@1.0.1(@langchain/core@1.1.29(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))':
     dependencies:
-      '@langchain/core': 1.1.27(openai@6.24.0(ws@8.19.0)(zod@4.3.6))
+      '@langchain/core': 1.1.29(openai@6.24.0(ws@8.19.0)(zod@4.3.6))
       js-tiktoken: 1.0.21
 
   '@ljharb/through@2.3.14':
@@ -9160,11 +9185,11 @@ snapshots:
 
   kleur@3.0.3: {}
 
-  langchain@1.2.26(@langchain/core@1.1.27(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))(openai@6.24.0(ws@8.19.0)(zod@4.3.6))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(zod-to-json-schema@3.25.1(zod@4.3.6)):
+  langchain@1.2.26(@langchain/core@1.1.29(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))(openai@6.24.0(ws@8.19.0)(zod@4.3.6))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(zod-to-json-schema@3.25.1(zod@4.3.6)):
     dependencies:
-      '@langchain/core': 1.1.27(openai@6.24.0(ws@8.19.0)(zod@4.3.6))
-      '@langchain/langgraph': 1.1.5(@langchain/core@1.1.27(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(zod-to-json-schema@3.25.1(zod@4.3.6))(zod@4.3.6)
-      '@langchain/langgraph-checkpoint': 1.0.0(@langchain/core@1.1.27(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))
+      '@langchain/core': 1.1.29(openai@6.24.0(ws@8.19.0)(zod@4.3.6))
+      '@langchain/langgraph': 1.1.5(@langchain/core@1.1.29(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(zod-to-json-schema@3.25.1(zod@4.3.6))(zod@4.3.6)
+      '@langchain/langgraph-checkpoint': 1.0.0(@langchain/core@1.1.29(openai@6.24.0(ws@8.19.0)(zod@4.3.6)))
       langsmith: 0.5.6(openai@6.24.0(ws@8.19.0)(zod@4.3.6))
       uuid: 10.0.0
       zod: 4.3.6
@@ -10769,6 +10794,8 @@ snapshots:
   utils-merge@1.0.1: {}
 
   uuid@10.0.0: {}
+
+  uuid@11.1.0: {}
 
   uuid@13.0.0: {}
 
