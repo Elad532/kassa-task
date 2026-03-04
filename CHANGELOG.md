@@ -9,6 +9,7 @@ Every commit section opens with the prompt or intention that created it.
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+  - [(api)/(pipeline)->test: add contract tests for VocabularyService, EmbeddingsService, VocabularyExpansionService](#apipipeline-test-add-contract-tests-for-vocabularyservice-embeddingsservice-vocabularyexpansionservice)
   - [(api)/(mirror)->feat: scaffold MirrorModule, VocabularyService, EmbeddingsService stubs](#apimirror-feat-scaffold-mirrormodule-vocabularyservice-embeddingsservice-stubs)
   - [(common,api)/(match)->feat: define Stage 2 and L3 types, modules, and public contracts](#commonapimatch-feat-define-stage-2-and-l3-types-modules-and-public-contracts)
   - [(root)/(docs)->docs: define Stage 2 and L3 architecture in TECH_SPEC with Mermaid diagrams](#rootdocs-docs-define-stage-2-and-l3-architecture-in-tech_spec-with-mermaid-diagrams)
@@ -24,6 +25,21 @@ Every commit section opens with the prompt or intention that created it.
 ---
 
 ## [Unreleased]
+
+### (api)/(pipeline)->test: add contract tests for VocabularyService, EmbeddingsService, VocabularyExpansionService
+
+> **Intent:** Phase 3 (Contract Tests) — define WHAT each service must do using the test-writer agent. Tests are written against Phase 2 stubs (10 tests failed on stubs) and now all pass after Phase 4 implementation.
+
+#### Stage 2 — Vocabulary Expansion
+##### Added
+- `apps/api/src/mirror/vocabulary/vocabulary.service.spec.ts` — 7 tests: valid output shape, refresh triggered when absent/stale, no refresh when fresh, singleton upsert pattern, Atlas distinct queries
+- `apps/api/src/pipeline/vocabulary-expansion/vocabulary-expansion.service.spec.ts` — 6 tests: valid output shape, term mapping via LLM, graceful error handling, no LLM call on matching terms, empty vocab passthrough, overall field preservation
+
+#### Stage 3 L3 — Vector Search on Local Mirror
+##### Added
+- `apps/api/src/mirror/embeddings/embeddings.service.spec.ts` — 10 tests: prose non-empty + contains field values + no JSON syntax, isReady() with 0/1 doc, search() result ordering + price filter + candidateCount upper bound
+
+---
 
 ### (api)/(mirror)->feat: scaffold MirrorModule, VocabularyService, EmbeddingsService stubs
 
